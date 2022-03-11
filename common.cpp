@@ -6,9 +6,11 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+#include <pthread.h>
 #include "common.h"
 
 double size;
+pthread_mutex_t mutex;
 
 //
 //  tuned constants
@@ -100,10 +102,12 @@ void apply_force( particle_t &particle, particle_t &neighbor )
     //  very simple short-range repulsive force
     //
     double coef = ( 1 - cutoff / r ) / r2 / mass;
+    //pthread_mutex_lock(&mutex);
     particle.ax += coef * dx;
-    particle.ay += coef * dy;
+    particle.ay += coef * dy;/* 
     neighbor.ax += coef * dx;
-    neighbor.ay += coef * dy;    
+    neighbor.ay += coef * dy;  
+    pthread_mutex_unlock(&mutex);   */
 }
 
 //
