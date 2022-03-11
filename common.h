@@ -23,6 +23,11 @@ typedef struct
   double ay;
 } particle_t;
 
+struct matrixElement {
+  int size = 0;
+  particle_t *list[10];
+};
+
 //
 //  timing routines
 //
@@ -48,5 +53,11 @@ void save( FILE *f, int n, particle_t *p );
 int find_option( int argc, char **argv, const char *option );
 int read_int( int argc, char **argv, const char *option, int default_value );
 char *read_string( int argc, char **argv, const char *option, char *default_value );
+
+//Self made functions
+double getSize();
+double getCutoff();
+void initMatrix(struct matrixElement **matrix, particle_t *particles, int n, int nrE, double max_velocity);
+void reposition(struct matrixElement **matrix, particle_t *particles, int n, int nrE, double max_velocity);
 
 #endif

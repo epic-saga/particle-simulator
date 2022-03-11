@@ -101,9 +101,7 @@ void apply_force( particle_t &particle, particle_t &neighbor )
     //
     double coef = ( 1 - cutoff / r ) / r2 / mass;
     particle.ax += coef * dx;
-    particle.ay += coef * dy;/* 
-    neighbor.ax += coef * dx;
-    neighbor.ay += coef * dy;  */   
+    particle.ay += coef * dy;
 }
 
 //
@@ -175,4 +173,79 @@ char *read_string( int argc, char **argv, const char *option, char *default_valu
     if( iplace >= 0 && iplace < argc-1 )
         return argv[iplace+1];
     return default_value;
+}
+
+//My functions
+
+double getCutoff(){
+    return cutoff;
+}
+double getSize(){
+    return size;
+}
+
+void initMatrix(struct matrixElement **matrixP, particle_t *particles, int n, int nrElem, double max_velocity){
+    for(int x = 0; x < n; x++){
+        //gets the matrix element to which particle[x] belongs
+            int y = (int) ((*(particles + x)).y/max_velocity);
+            int xz = (int) ((*(particles + x)).x/max_velocity);
+
+            struct matrixElement *element = (*(matrixP + y) + xz);
+
+            element -> list[element -> size++] = particles + x;
+    }
+    int nrOver = 0;
+    int nrUnd = 0;
+    for(int y = 0; y < nrElem; y++){
+        for(int x = 0; x < nrElem; x++){
+            struct matrixElement *element = (*(matrixP + y) +x);
+            if(element -> size){
+                nrOver++;
+            } else{
+                nrUnd++;
+            }
+        }
+    }
+    printf("nrOver: %d, nrUnder: %d", nrOver, nrUnd);
+    printf("coreDumped in initMatrix");
+    fflush(stdout);
+}
+
+void cleanList(struct matrixElement *element){//Cleans the list so that there aren¨t nul pointer laying around in the middle of the list
+    for(int i = 0; i < element -> size; i++){
+        if(element -> list[i] == 0){
+            element -> list[i] = element -> list[--(element -> size)];
+        }
+    }
+}
+
+void reposition(struct matrixElement **matrixP, particle_t *particles, int n, int nrElem, double max_velocity){
+    for(int y = 0; y < nrElem; y++){
+        for(int x = 0; x < nrElem; x++){
+
+            //Gets the matrix element to which particle[x] belongs
+            struct matrixElement *element = *(matrixP + y) + x;
+            int cleanNeeded = 0;
+            for(int h = 0; h < element -> size; h++){
+                if((int) ((element -> list[h] -> x/max_velocity)) != x || (int) ((element -> list[h] -> y/max_velocity)) != y){
+                    cleanNeeded = 1;
+                    particle_t *moveParticle = element -> list[h];
+                    //Getting the new element
+                    int my = (int) (moveParticle -> y/max_velocity);
+                    int mx = (int) (moveParticle -> x/max_velocity);
+
+                    struct matrixElement *element2 = *(matrixP + my) + mx;
+                    element -> list[h] == 0; //Removes it from previous matrix element
+                    
+                    element2 -> list[(element2 -> size)++] = moveParticle; //Puts it in the new matrix elem
+                    if(cleanNeeded){
+                        cleanList(element);
+                        cleanNeeded = 0;
+                    }
+                }
+            }
+        }
+    }
+    printf("coreDumped in reposition\n");
+    fflush(stdout);
 }
