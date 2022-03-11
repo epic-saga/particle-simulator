@@ -1,0 +1,4 @@
+n = 10, n_threads = 2, simulation time = 0.024164 seconds
+n = 100, n_threads = 2, simulation time = 0.128338 seconds
+n = 1000, n_threads = 2, simulation time = 6.38604 seconds
+n = 5000, n_threads = 2, simulation time = 143.768 seconds

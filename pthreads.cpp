@@ -39,8 +39,8 @@ void *thread_routine( void *pthread_id )
         //
         for( int i = first; i < last; i++ )
         {
-            particles[i].ax = particles[i].ay = 0;
-            for (int j = 0; j < n; j++ )
+            
+            for (int j = i + 1; j < n; j++ )
                 apply_force( particles[i], particles[j] );
         }
         
@@ -49,8 +49,10 @@ void *thread_routine( void *pthread_id )
         //
         //  move particles
         //
-        for( int i = first; i < last; i++ ) 
+        for( int i = first; i < last; i++ ) {
             move( particles[i] );
+            particles[i].ax = particles[i].ay = 0;
+        }
         
         pthread_barrier_wait( &barrier );
         

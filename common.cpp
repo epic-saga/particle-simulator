@@ -102,12 +102,12 @@ void apply_force( particle_t &particle, particle_t &neighbor )
     //  very simple short-range repulsive force
     //
     double coef = ( 1 - cutoff / r ) / r2 / mass;
-    //pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex);
     particle.ax += coef * dx;
-    particle.ay += coef * dy;/* 
+    particle.ay += coef * dy;
     neighbor.ax += coef * dx;
     neighbor.ay += coef * dy;  
-    pthread_mutex_unlock(&mutex);   */
+    pthread_mutex_unlock(&mutex);  
 }
 
 //
