@@ -38,7 +38,8 @@ int main( int argc, char **argv )
         //
         for( int i = 0; i < n; i++ )
         {
-            for (int j = i + 1; j < n; j++ )
+            particles[i].ax = particles[i].ay = 0;
+            for (int j = 0; j < n; j++ )
                 apply_force( particles[i], particles[j] );
         }
         
@@ -47,7 +48,6 @@ int main( int argc, char **argv )
         //
         for( int i = 0; i < n; i++ ) {
             move( particles[i] );
-            particles[i].ax = particles[i].ay = 0;
         }
         
         //

@@ -1,0 +1,5 @@
+n = 10, simulation time = 0.00502 seconds
+n = 100, simulation time = 0.117784 seconds
+n = 1000, simulation time = 7.67533 seconds
+n = 2000, simulation time = 31.3066 seconds
+n = 3000, simulation time = 69.882 seconds
