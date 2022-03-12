@@ -214,9 +214,20 @@ void initMatrix(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, pa
     fflush(stdout);
 }
 
-void reposition(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrElem, double max_velocity){
-    for(int y = 0; y < nrElem; y++){
-        for(int x = 0; x < nrElem; x++){
+void reposition(int index, std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrElem, double max_velocity){
+    int y = 0;
+    int x = 0;
+    if (index == 1){
+        y = 1;
+    }
+    if (index == 2){
+        x = 1;
+    }
+    if (index == 3){
+        y = x = 1;
+    }
+    for(y; y < nrElem; y+=2){
+        for(x; x < nrElem; x+=2){
 
             //Gets the matrix element to which particle[x] belongs
             std::vector<particle_t *> element = matrixP.at(y).at(x);
@@ -228,11 +239,9 @@ void reposition(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, pa
                     int mx = (int) (moveParticle -> x/max_velocity);
 
                     std::vector<particle_t *> element2 = matrixP.at(my).at(mx);
-                    pthread_mutex_lock(&mutex);
                     element.erase(element.begin() + h); //Removes it from previous matrix element
                     
                     element2.push_back(moveParticle); //Puts it in the new matrix elem
-                    pthread_mutex_unlock(&mutex);
                 }
             }
         }

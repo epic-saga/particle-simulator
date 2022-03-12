@@ -59,6 +59,6 @@ char *read_string( int argc, char **argv, const char *option, char *default_valu
 double getSize();
 double getCutoff();
 void initMatrix(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrE, double max_velocity);
-void reposition(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrE, double max_velocity);
+void reposition(int index, std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrE, double max_velocity);
 
 #endif
