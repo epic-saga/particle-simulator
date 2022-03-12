@@ -1,5 +1,6 @@
 #ifndef __CS267_COMMON_H__
 #define __CS267_COMMON_H__
+#include <vector>
 
 inline int min( int a, int b ) { return a < b ? a : b; }
 inline int max( int a, int b ) { return a > b ? a : b; }
@@ -22,6 +23,11 @@ typedef struct
   double ax;
   double ay;
 } particle_t;
+
+struct matrixElement {
+  int size = 0;
+  particle_t *list[10];
+};
 
 //
 //  timing routines
@@ -48,5 +54,11 @@ void save( FILE *f, int n, particle_t *p );
 int find_option( int argc, char **argv, const char *option );
 int read_int( int argc, char **argv, const char *option, int default_value );
 char *read_string( int argc, char **argv, const char *option, char *default_value );
+
+//Self made functions
+double getSize();
+double getCutoff();
+void initMatrix(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrE, double max_velocity);
+void reposition(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrE, double max_velocity);
 
 #endif

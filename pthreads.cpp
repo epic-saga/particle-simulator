@@ -4,6 +4,7 @@
 #include <math.h>
 #include <pthread.h>
 #include "common.h"
+#include <vector>
 
 //
 //  global variables
@@ -12,6 +13,11 @@ int n, n_threads;
 particle_t *particles;
 FILE *fsave;
 pthread_barrier_t barrier;
+
+double max_velocity;
+double size2;
+int nrElem;
+std::vector<std::vector<std::vector<particle_t *>>> mat;
 
 //
 //  check that pthreads routine call was successful
@@ -37,11 +43,25 @@ void *thread_routine( void *pthread_id )
         //
         //  compute forces
         //
-        for( int i = first; i < last; i++ )
-        {
-            
-            for (int j = i + 1; j < n; j++ )
-                apply_force( particles[i], particles[j] );
+        for(int y = 0; y < nrElem; y++){        
+            for(int x = 0; x < nrElem; x++){//Goes through every matrix element
+            std::vector<particle_t *> element = mat.at(y).at(x);
+                for(int z = 0; z < element.size(); z++){ //Goes through each particle in each matrix
+                    particle_t *part = element.at(z);
+                    for(int g = -1; g <= 1; g++){ //Applies forces from every particle on adjacet and the same matrix element
+                        for(int h = -1; h <= 1; h++){
+                            if(x+g >= 0 && x+g < nrElem && y+h >= 0 && y+h < nrElem){
+                                std::vector<particle_t *> checkAgainst = mat.at(y+h).at(x+g);
+                                for(int gh = 0; gh < checkAgainst.size(); gh++){ 
+                                if(g != 0 || h != 0 || gh != z){// an if-statement so it doesn't apply force to itself
+                                    apply_force(*part, *checkAgainst.at(gh));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         pthread_barrier_wait( &barrier );
@@ -51,8 +71,10 @@ void *thread_routine( void *pthread_id )
         //
         for( int i = first; i < last; i++ ) {
             move( particles[i] );
-            particles[i].ax = particles[i].ay = 0;
+            
         }
+
+        reposition(mat, particles, n, nrElem, max_velocity); 
         
         pthread_barrier_wait( &barrier );
         
@@ -96,6 +118,48 @@ int main( int argc, char **argv )
     particles = (particle_t*) malloc( n * sizeof(particle_t) );
     set_size( n );
     init_particles( n, particles );
+
+
+    max_velocity = getCutoff();
+    size2 = getSize();
+    nrElem = (int) (size2/max_velocity) + 1;
+
+    //std::vector<std::vector<std::vector<particle_t *>>> mat;
+    //mat.reserve(nrElem);
+
+    for(int i = 0; i < nrElem; i++){
+        std::vector<std::vector<particle_t *>> another = {};
+        for(int x = 0; x < nrElem; x++){
+            std::vector<particle_t *> an;
+            another.push_back(an);
+        }
+        mat.push_back(another);
+        
+    }
+    fflush(stdout);
+
+    initMatrix(mat, particles, n , nrElem, max_velocity); //Not core dumped in initmatrix
+
+
+     //Check if pointers point right, it's initialized right
+    int nrRight = 0;
+    for(int i = 0; i < n;i++){
+        particle_t *ps = particles + i;
+            int y = (int) ((*(particles + i)).y/max_velocity);
+            int xz = (int) ((*(particles + i)).x/max_velocity);
+
+            std::vector<particle_t *> el = mat.at(i/nrElem).at(i%nrElem);
+
+        int rightPlace = 0;
+        for(int x = 0; x < el.size(); x++){
+            if(el.at(x) == ps){
+                rightPlace = 1;
+            }
+        }
+        if(rightPlace){
+            nrRight++;
+        }
+    }
 
     pthread_attr_t attr;
     P( pthread_attr_init( &attr ) );
