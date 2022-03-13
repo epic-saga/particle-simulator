@@ -214,10 +214,10 @@ void initMatrix(std::vector<std::vector<std::vector<particle_t *>>> &matrixP, pa
     fflush(stdout);
 }
 
-void reposition(int y, int x, std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int n, int nrElem, double max_velocity){
-    for(y; y < nrElem; y+=3){
+void reposition(int y, int x, std::vector<std::vector<std::vector<particle_t *>>> &matrixP, particle_t *particles, int first, int last, int nrElem, double max_velocity){
+    y = first + y;
+    for(y; y < last; y+=3){
         for(x; x < nrElem; x+=3){
-
             //Gets the matrix element to which particle[x] belongs
             std::vector<particle_t *> element = matrixP.at(y).at(x);
             for(int h = 0; h < element.size(); h++){

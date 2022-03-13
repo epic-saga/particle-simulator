@@ -14,9 +14,9 @@ particle_t *particles;
 FILE *fsave;
 pthread_barrier_t barrier;
 
-double max_velocity;
+double max_distance;
 double size2;
-int nrElem;
+int gridElem;
 std::vector<std::vector<std::vector<particle_t *>>> mat;
 
 //
@@ -31,9 +31,9 @@ void *thread_routine( void *pthread_id )
 {
     int thread_id = *(int*)pthread_id;
 
-    int particles_per_thread = (n + n_threads - 1) / n_threads;
-    int first = min(  thread_id    * particles_per_thread, n );
-    int last  = min( (thread_id+1) * particles_per_thread, n );
+    int particles_per_thread = (gridElem + n_threads - 1) / n_threads;
+    int first = min(  thread_id    * particles_per_thread, gridElem );
+    int last  = min( (thread_id+1) * particles_per_thread, gridElem );
     
     //
     //  simulate a number of time steps
@@ -43,14 +43,14 @@ void *thread_routine( void *pthread_id )
         //
         //  compute forces
         //
-        for(int y = 0; y < nrElem; y++){        
-            for(int x = 0; x < nrElem; x++){//Goes through every matrix element
+        for(int y = first; y < last; y++){        
+            for(int x = 0; x < gridElem; x++){//Goes through every matrix element
             std::vector<particle_t *> element = mat.at(y).at(x);
                 for(int z = 0; z < element.size(); z++){ //Goes through each particle in each matrix
                     particle_t *part = element.at(z);
                     for(int g = -1; g <= 1; g++){ //Applies forces from every particle on adjacet and the same matrix element
                         for(int h = -1; h <= 1; h++){
-                            if(x+g >= 0 && x+g < nrElem && y+h >= 0 && y+h < nrElem){
+                            if(x+g >= 0 && x+g < gridElem && y+h >= 0 && y+h < gridElem){
                                 std::vector<particle_t *> checkAgainst = mat.at(y+h).at(x+g);
                                 for(int gh = 0; gh < checkAgainst.size(); gh++){ 
                                 if(g != 0 || h != 0 || gh != z){// an if-statement so it doesn't apply force to itself
@@ -71,16 +71,18 @@ void *thread_routine( void *pthread_id )
         //
         for( int i = first; i < last; i++ ) {
             move( particles[i] );
-            
+            particles[i].ax = particles[i].ay = 0;
         }
+        pthread_barrier_wait( &barrier );
+
         for(int y = 0; y < 3; y++){
             for(int x = 0; x < 3; x++){
-                reposition(y, x, mat, particles, n, nrElem, max_velocity);    
+                reposition(y, x, mat, particles, first, last, gridElem, max_distance);    
                 pthread_barrier_wait( &barrier );
             }
         } 
         
-        pthread_barrier_wait( &barrier );
+        //pthread_barrier_wait( &barrier );
         
         //
         //  save if necessary
@@ -124,16 +126,16 @@ int main( int argc, char **argv )
     init_particles( n, particles );
 
 
-    max_velocity = getCutoff();
+    max_distance = getCutoff();
     size2 = getSize();
-    nrElem = (int) (size2/max_velocity) + 1;
+    gridElem = (int) (size2/max_distance) + 1;
 
     //std::vector<std::vector<std::vector<particle_t *>>> mat;
-    //mat.reserve(nrElem);
+    //mat.reserve(gridElem);
 
-    for(int i = 0; i < nrElem; i++){
+    for(int i = 0; i < gridElem; i++){
         std::vector<std::vector<particle_t *>> another = {};
-        for(int x = 0; x < nrElem; x++){
+        for(int x = 0; x < gridElem; x++){
             std::vector<particle_t *> an;
             another.push_back(an);
         }
@@ -142,17 +144,17 @@ int main( int argc, char **argv )
     }
     fflush(stdout);
 
-    initMatrix(mat, particles, n , nrElem, max_velocity); //Not core dumped in initmatrix
+    initMatrix(mat, particles, n , gridElem, max_distance); //Not core dumped in initmatrix
 
 
      //Check if pointers point right, it's initialized right
     int nrRight = 0;
     for(int i = 0; i < n;i++){
         particle_t *ps = particles + i;
-            int y = (int) ((*(particles + i)).y/max_velocity);
-            int xz = (int) ((*(particles + i)).x/max_velocity);
+            int y = (int) ((*(particles + i)).y/max_distance);
+            int xz = (int) ((*(particles + i)).x/max_distance);
 
-            std::vector<particle_t *> el = mat.at(i/nrElem).at(i%nrElem);
+            std::vector<particle_t *> el = mat.at(i/gridElem).at(i%gridElem);
 
         int rightPlace = 0;
         for(int x = 0; x < el.size(); x++){
