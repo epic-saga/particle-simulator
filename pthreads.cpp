@@ -64,7 +64,9 @@ void *thread_routine( void *pthread_id )
                 }
             }
         }
-        
+        int particles_per_thread = (n + n_threads - 1) / n_threads;
+        int first = min(  thread_id    * particles_per_thread, n );
+        int last  = min( (thread_id+1) * particles_per_thread, n );        
         pthread_barrier_wait( &barrier );
         
         //
@@ -76,13 +78,14 @@ void *thread_routine( void *pthread_id )
         }
         pthread_barrier_wait( &barrier );
 
-        for(int y = 0; y < 3; y++){
+/*         for(int y = 0; y < 3; y++){
             for(int x = 0; x < 3; x++){
                 reposition(y, x, mat, particles, first, last, gridElem, max_distance);    
                 pthread_barrier_wait( &barrier );
             }
-        } 
-        
+        }  */
+        reposition(0, 0, mat, particles, first, last, gridElem, max_distance);    
+        pthread_barrier_wait( &barrier );        
         //pthread_barrier_wait( &barrier );
         
         //
