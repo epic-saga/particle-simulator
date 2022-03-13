@@ -73,9 +73,11 @@ void *thread_routine( void *pthread_id )
             move( particles[i] );
             
         }
-        for(int i = 0; i < 4; i++){
-            reposition(i, mat, particles, n, nrElem, max_velocity);    
-            pthread_barrier_wait( &barrier );
+        for(int y = 0; y < 3; y++){
+            for(int x = 0; x < 3; x++){
+                reposition(y, x, mat, particles, n, nrElem, max_velocity);    
+                pthread_barrier_wait( &barrier );
+            }
         } 
         
         pthread_barrier_wait( &barrier );
