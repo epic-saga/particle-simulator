@@ -48,6 +48,7 @@ void *thread_routine( void *pthread_id )
             std::vector<particle_t *> element = mat.at(y).at(x);
                 for(int z = 0; z < element.size(); z++){ //Goes through each particle in each matrix
                     particle_t *part = element.at(z);
+                    part ->ax = part -> ay = 0; // Sets acceleration to 0
                     for(int g = -1; g <= 1; g++){ //Applies forces from every particle on adjacet and the same matrix element
                         for(int h = -1; h <= 1; h++){
                             if(x+g >= 0 && x+g < gridElem && y+h >= 0 && y+h < gridElem){
@@ -71,7 +72,7 @@ void *thread_routine( void *pthread_id )
         //
         for( int i = first; i < last; i++ ) {
             move( particles[i] );
-            particles[i].ax = particles[i].ay = 0;
+            //particles[i].ax = particles[i].ay = 0;
         }
         pthread_barrier_wait( &barrier );
 
