@@ -228,8 +228,9 @@ void reposition(int y, int x, std::vector<std::vector<std::vector<particle_t *>>
                     int mx = (int) (moveParticle -> x/max_velocity);
 
                     std::vector<particle_t *> element2 = matrixP.at(my).at(mx);
+
+                    //try mutex
                     element.erase(element.begin() + h); //Removes it from previous matrix element
-                    
                     element2.push_back(moveParticle); //Puts it in the new matrix elem
                 }
             }
